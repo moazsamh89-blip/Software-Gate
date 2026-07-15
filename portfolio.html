@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>أعمالنا السابقة | Software Gate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header>
+  <div class="container nav-wrap">
+    <a href="index.html" class="brand">
+      <svg class="brand-mark" viewBox="0 0 100 100"><defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#123C5F"/><stop offset="1" stop-color="#17B8C4"/></linearGradient></defs>
+      <path d="M50 6C30 6 16 20 16 40v18l17 14 17-13 17 13 17-14V40C84 20 70 6 50 6Z" fill="url(#lg1)"/>
+      <path d="M50 30v22M40 34l7 9M60 34l-7 9" stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none"/></svg>
+      <span class="brand-text">SOFTWARE GATE<small>Building the Digital Future</small></span>
+    </a>
+    <nav class="nav-links" id="navLinks">
+      <a href="index.html">الرئيسية</a>
+      <a href="about.html">من نحن</a>
+      <a href="portfolio.html" class="active">أعمالنا السابقة</a>
+      <a href="booking.html" class="nav-cta">احجز استشارتك</a>
+    </nav>
+    <button class="burger" id="burgerBtn">☰</button>
+  </div>
+</header>
+
+<section style="padding-top:48px;">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow" style="margin:0 auto 14px;display:table;">أعمالنا</div>
+      <h2>مشاريع أنجزناها</h2>
+      <p>نماذج من المواقع التي صممناها وبرمجناها لعملائنا.</p>
+    </div>
+
+    <div class="portfolio-filter" id="pfFilter"></div>
+
+    <div id="pfGridWrap"></div>
+
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand">
+          <svg width="30" height="30" viewBox="0 0 100 100"><path d="M50 6C30 6 16 20 16 40v18l17 14 17-13 17 13 17-14V40C84 20 70 6 50 6Z" fill="#17B8C4"/></svg>
+          SOFTWARE GATE
+        </div>
+        <p>بوابتك نحو حضور رقمي احترافي. نصمم مواقع وأنظمة تليق بطموحك.</p>
+      </div>
+      <div>
+        <h4>روابط سريعة</h4>
+        <ul>
+          <li><a href="index.html">الرئيسية</a></li>
+          <li><a href="about.html">من نحن</a></li>
+          <li><a href="portfolio.html">أعمالنا السابقة</a></li>
+          <li><a href="booking.html">احجز الآن</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>تواصل معنا</h4>
+        <ul>
+          <li>hello@softwaregate.com</li>
+          <li>+20 100 000 0000</li>
+          <li>القاهرة، مصر</li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Software Gate. جميع الحقوق محفوظة.</span>
+      <span class="secret-dot" title="لوحة التحكم"><a href="admin.html">•</a></span>
+    </div>
+  </div>
+</footer>
+<script src="assets/script.js"></script>
+<script>
+(function () {
+  var STORAGE_KEY = 'sg_portfolio_projects';
+
+  var DEFAULT_PROJECTS = [
+    { id: 1, title: 'موقع عيادة الدكتور سامي', category: 'موقع تعريفي', image: '', description: 'موقع تعريفي طبي مع نظام حجز مواعيد ومعرض خدمات.' },
+    { id: 2, title: 'لوحة تحكم Foodly', category: 'لوحة تحكم مخصصة', image: '', description: 'نظام إدارة طلبات لمطاعم متعددة الفروع مع تقارير مبيعات لحظية.' }
+  ];
+
+  function loadProjects() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return DEFAULT_PROJECTS.slice();
+      var parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return DEFAULT_PROJECTS.slice();
+      return parsed;
+    } catch (e) {
+      return DEFAULT_PROJECTS.slice();
+    }
+  }
+
+  var projects = loadProjects();
+  var filterWrap = document.getElementById('pfFilter');
+  var gridWrap = document.getElementById('pfGridWrap');
+
+  var categories = ['الكل'];
+  projects.forEach(function (p) {
+    if (p.category && categories.indexOf(p.category) === -1) categories.push(p.category);
+  });
+
+  function esc(s) {
+    var d = document.createElement('div');
+    d.textContent = s || '';
+    return d.innerHTML;
+  }
+
+  function renderFilters(active) {
+    filterWrap.innerHTML = '';
+    categories.forEach(function (cat) {
+      var btn = document.createElement('button');
+      btn.className = 'pf-btn' + (cat === active ? ' active' : '');
+      btn.setAttribute('data-cat', cat);
+      btn.textContent = cat;
+      btn.addEventListener('click', function () {
+        renderFilters(cat);
+        renderGrid(cat);
+      });
+      filterWrap.appendChild(btn);
+    });
+  }
+
+  function renderGrid(activeCat) {
+    var visible = projects.filter(function (p) {
+      return activeCat === 'الكل' || p.category === activeCat;
+    });
+
+    if (!projects.length) {
+      gridWrap.innerHTML = '<div class="empty-state">لا توجد مشاريع مضافة بعد. تابعونا قريباً!</div>';
+      return;
+    }
+    if (!visible.length) {
+      gridWrap.innerHTML = '<div class="empty-state">لا توجد مشاريع في هذا التصنيف بعد.</div>';
+      return;
+    }
+
+    var html = '<div class="pf-grid">';
+    visible.forEach(function (p) {
+      html += '<div class="pf-card">';
+      html += '<div class="pf-thumb">';
+      if (p.image) {
+        html += '<img src="' + esc(p.image) + '" alt="' + esc(p.title) + '" onerror="this.parentElement.innerHTML=\'<span class=&quot;ph&quot;>' + esc(p.title).replace(/'/g, '') + '</span>\'">';
+      } else {
+        html += '<span class="ph">' + esc(p.title) + '</span>';
+      }
+      html += '</div>';
+      html += '<div class="pf-body">';
+      html += '<div class="cat">' + esc(p.category) + '</div>';
+      html += '<h3>' + esc(p.title) + '</h3>';
+      html += '<p>' + esc(p.description) + '</p>';
+      html += '</div></div>';
+    });
+    html += '</div>';
+    gridWrap.innerHTML = html;
+  }
+
+  renderFilters('الكل');
+  renderGrid('الكل');
+})();
+</script>
+</body>
+</html>

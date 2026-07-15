@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة التحكم | Software Gate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<!-- شاشة الدخول -->
+<div class="login-shell" id="loginShell">
+  <div class="login-box">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 100 100" width="38" height="38"><defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#123C5F"/><stop offset="1" stop-color="#17B8C4"/></linearGradient></defs>
+      <path d="M50 6C30 6 16 20 16 40v18l17 14 17-13 17 13 17-14V40C84 20 70 6 50 6Z" fill="url(#lg1)"/>
+      <path d="M50 30v22M40 34l7 9M60 34l-7 9" stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none"/></svg>
+      <span class="brand-text">SOFTWARE GATE</span>
+    </div>
+    <h3>لوحة التحكم</h3>
+    <p>سجّل الدخول لإدارة أعمالنا السابقة</p>
+    <div id="loginAlert" class="alert err" style="display:none;">كلمة المرور غير صحيحة</div>
+    <form id="loginForm">
+      <div class="field"><label>كلمة المرور</label><input type="password" id="pwInput" required placeholder="••••••••"></div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">دخول</button>
+    </form>
+    <p class="small-note" style="text-align:center;margin-top:16px;">كلمة المرور الافتراضية: <b>admin123</b></p>
+  </div>
+</div>
+
+<!-- لوحة التحكم -->
+<div id="adminShell" style="display:none;">
+  <div class="admin-top">
+    <div class="container">
+      <div class="a-brand">
+        <svg width="26" height="26" viewBox="0 0 100 100"><path d="M50 6C30 6 16 20 16 40v18l17 14 17-13 17 13 17-14V40C84 20 70 6 50 6Z" fill="#17B8C4"/></svg>
+        لوحة تحكم Software Gate
+      </div>
+      <button class="admin-logout" id="logoutBtn">تسجيل الخروج</button>
+    </div>
+  </div>
+
+  <div class="admin-body">
+    <div class="container">
+
+      <div class="admin-tabs">
+        <button class="a-tab active" id="tabBtnBookings" data-tab="bookings">الحجوزات <span id="newBookingsBadge"></span></button>
+        <button class="a-tab" id="tabBtnPortfolio" data-tab="portfolio">أعمالنا السابقة</button>
+        <button class="a-tab" id="tabBtnPlans" data-tab="plans">الباقات والأسعار</button>
+      </div>
+
+      <!-- ===== تبويب الحجوزات ===== -->
+      <div id="tabBookings">
+        <div class="a-card">
+          <h3>طلبات الحجز الواردة</h3>
+          <div id="bookingsWrap"></div>
+          <p class="small-note" style="margin-top:16px;">
+            هذه الحجوزات مُرسَلة من صفحة «احجز الآن» ومحفوظة في متصفح هذا الجهاز فقط (localStorage)،
+            لأن الموقع صفحات HTML ثابتة بدون خادم فعلي. لن تظهر حجوزات أُرسلت من متصفح أو جهاز آخر هنا.
+          </p>
+        </div>
+      </div>
+
+      <!-- ===== تبويب الأعمال السابقة ===== -->
+      <div id="tabPortfolio" style="display:none;">
+
+      <div class="a-card">
+        <h3 id="formTitle">إضافة عمل جديد إلى «أعمالنا السابقة»</h3>
+        <div id="formAlert" class="alert ok" style="display:none;"></div>
+        <form id="projectForm">
+          <input type="hidden" id="editId" value="">
+          <div class="a-grid2">
+            <div class="field"><label>اسم المشروع</label><input type="text" id="pTitle" required placeholder="مثال: موقع متجر كذا"></div>
+            <div class="field"><label>التصنيف</label>
+              <select id="pCategory">
+                <option>موقع تعريفي</option>
+                <option>لوحة تحكم مخصصة</option>
+                <option>تطبيق ويب</option>
+                <option>أخرى</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>رابط صورة المشروع (اختياري)</label>
+            <input type="url" id="pImage" placeholder="https://example.com/image.jpg">
+            <p class="small-note">ضع رابط صورة مباشر من الإنترنت (وليس رفع ملف). إذا تُرك فارغاً، سيظهر اسم المشروع بدلاً من الصورة.</p>
+          </div>
+          <div class="field"><label>وصف قصير</label><textarea id="pDesc" placeholder="وصف مختصر عن المشروع..."></textarea></div>
+          <div style="display:flex;gap:10px;">
+            <button type="submit" class="btn btn-primary" id="submitBtn">حفظ المشروع</button>
+            <button type="button" class="btn btn-ghost" id="cancelEditBtn" style="display:none;">إلغاء التعديل</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="a-card">
+        <h3>الأعمال الحالية</h3>
+        <div id="projectList" class="admin-item-list"></div>
+        <p class="small-note" style="margin-top:16px;">
+          يتم حفظ هذه البيانات في متصفحك فقط (localStorage) لأن الموقع صفحات HTML ثابتة بدون خادم أو قاعدة بيانات.
+          أي تعديل هنا يظهر فوراً في صفحة «أعمالنا السابقة» على نفس هذا المتصفح والجهاز فقط، ولن يظهر تلقائياً لزوار آخرين
+          على أجهزة مختلفة. لعرض التعديلات لجميع الزوار، يلزم ربط الموقع بخادم/قاعدة بيانات فعلية.
+        </p>
+        <button class="mini-btn del" id="resetBtn" style="margin-top:6px;">استعادة الأعمال الافتراضية</button>
+      </div>
+
+      </div>
+      <!-- ===== نهاية تبويب الأعمال السابقة ===== -->
+
+      <!-- ===== تبويب الباقات والأسعار ===== -->
+      <div id="tabPlans" style="display:none;">
+
+      <div class="a-card">
+        <h3 id="planFormTitle">إضافة باقة جديدة</h3>
+        <div id="planFormAlert" class="alert ok" style="display:none;"></div>
+        <form id="planForm">
+          <input type="hidden" id="editPlanId" value="">
+          <div class="a-grid2">
+            <div class="field"><label>اسم الباقة</label><input type="text" id="plName" required placeholder="مثال: الباقة الذهبية"></div>
+            <div class="field"><label>وصف قصير</label><input type="text" id="plDescription" placeholder="مثال: موقع أعمال متكامل"></div>
+          </div>
+          <div class="a-grid2">
+            <div class="field"><label>السعر</label><input type="number" id="plPrice" min="0" step="1" required placeholder="مثال: 5900"></div>
+            <div class="field"><label>العملة</label><input type="text" id="plCurrency" value="ج.م"></div>
+          </div>
+          <div class="field">
+            <label>المميزات (اكتب كل ميزة في سطر منفصل)</label>
+            <textarea id="plFeatures" placeholder="حتى 5 صفحات
+تصميم متجاوب
+نموذج تواصل" style="min-height:120px;"></textarea>
+            <p class="small-note">أضف أو احذف أو عدّل أي سطر لتغيير مميزات الباقة.</p>
+          </div>
+          <div class="a-grid2">
+            <div class="field"><label>ترتيب العرض</label><input type="number" id="plSortOrder" value="1" min="1" step="1"></div>
+            <div class="field" style="display:flex;align-items:center;gap:8px;padding-top:26px;">
+              <input type="checkbox" id="plFeatured" style="width:18px;height:18px;">
+              <label for="plFeatured" style="margin:0;">الأكثر طلباً (تمييز الباقة)</label>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button type="submit" class="btn btn-primary" id="planSubmitBtn">حفظ الباقة</button>
+            <button type="button" class="btn btn-ghost" id="planCancelEditBtn" style="display:none;">إلغاء التعديل</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="a-card">
+        <h3>الباقات الحالية</h3>
+        <div id="planList" class="admin-item-list"></div>
+        <p class="small-note" style="margin-top:16px;">
+          يتم حفظ الباقات في متصفحك فقط (localStorage). أي تعديل هنا يظهر فوراً في باقات الأسعار
+          على الصفحة الرئيسية على نفس هذا المتصفح والجهاز فقط.
+        </p>
+        <button class="mini-btn del" id="resetPlansBtn" style="margin-top:6px;">استعادة الباقات الافتراضية</button>
+      </div>
+
+      </div>
+      <!-- ===== نهاية تبويب الباقات والأسعار ===== -->
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var STORAGE_KEY = 'sg_portfolio_projects';
+  var AUTH_KEY = 'sg_admin_auth';
+  var ADMIN_PASSWORD = 'admin123'; // غيّر هذه القيمة إلى كلمة مرور خاصة بك
+
+  var DEFAULT_PROJECTS = [
+    { id: 1, title: 'موقع عيادة الدكتور سامي', category: 'موقع تعريفي', image: '', description: 'موقع تعريفي طبي مع نظام حجز مواعيد ومعرض خدمات.' },
+    { id: 2, title: 'لوحة تحكم Foodly', category: 'لوحة تحكم مخصصة', image: '', description: 'نظام إدارة طلبات لمطاعم متعددة الفروع مع تقارير مبيعات لحظية.' }
+  ];
+
+  var loginShell = document.getElementById('loginShell');
+  var adminShell = document.getElementById('adminShell');
+  var loginForm = document.getElementById('loginForm');
+  var loginAlert = document.getElementById('loginAlert');
+
+  function isLoggedIn() {
+    return sessionStorage.getItem(AUTH_KEY) === '1';
+  }
+
+  function showAdmin() {
+    loginShell.style.display = 'none';
+    adminShell.style.display = 'block';
+    renderList();
+    renderBookings();
+    renderPlans();
+  }
+
+  function showLogin() {
+    loginShell.style.display = 'flex';
+    adminShell.style.display = 'none';
+  }
+
+  loginForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var pw = document.getElementById('pwInput').value;
+    if (pw === ADMIN_PASSWORD) {
+      sessionStorage.setItem(AUTH_KEY, '1');
+      showAdmin();
+    } else {
+      loginAlert.style.display = 'block';
+    }
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', function () {
+    sessionStorage.removeItem(AUTH_KEY);
+    showLogin();
+  });
+
+  if (isLoggedIn()) { showAdmin(); } else { showLogin(); }
+
+  // ---- التبويبات ----
+  var tabBtnBookings = document.getElementById('tabBtnBookings');
+  var tabBtnPortfolio = document.getElementById('tabBtnPortfolio');
+  var tabBtnPlans = document.getElementById('tabBtnPlans');
+  var tabBookings = document.getElementById('tabBookings');
+  var tabPortfolio = document.getElementById('tabPortfolio');
+  var tabPlans = document.getElementById('tabPlans');
+
+  function switchTab(name) {
+    tabBookings.style.display = name === 'bookings' ? 'block' : 'none';
+    tabPortfolio.style.display = name === 'portfolio' ? 'block' : 'none';
+    tabPlans.style.display = name === 'plans' ? 'block' : 'none';
+    tabBtnBookings.classList.toggle('active', name === 'bookings');
+    tabBtnPortfolio.classList.toggle('active', name === 'portfolio');
+    tabBtnPlans.classList.toggle('active', name === 'plans');
+  }
+  tabBtnBookings.addEventListener('click', function () { switchTab('bookings'); });
+  tabBtnPortfolio.addEventListener('click', function () { switchTab('portfolio'); });
+  tabBtnPlans.addEventListener('click', function () { switchTab('plans'); });
+
+  // ---- إدارة الحجوزات ----
+  var BOOKINGS_KEY = 'sg_bookings';
+
+  function loadBookings() {
+    try {
+      var raw = localStorage.getItem(BOOKINGS_KEY);
+      var parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveBookings(list) {
+    localStorage.setItem(BOOKINGS_KEY, JSON.stringify(list));
+  }
+
+  function statusClass(status) {
+    if (status === 'تم التواصل') return 'status-contacted';
+    if (status === 'مكتمل') return 'status-done';
+    return 'status-new';
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return '';
+    try {
+      var d = new Date(iso);
+      return d.toLocaleDateString('ar-EG') + ' ' + d.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+    } catch (e) { return iso; }
+  }
+
+  function renderBookings() {
+    var list = loadBookings();
+    var wrap = document.getElementById('bookingsWrap');
+    var badge = document.getElementById('newBookingsBadge');
+
+    var newCount = list.filter(function (b) { return b.status === 'جديد'; }).length;
+    badge.textContent = newCount > 0 ? '(' + newCount + ')' : '';
+
+    if (!list.length) {
+      wrap.innerHTML = '<p class="small-note">لا توجد طلبات حجز حتى الآن.</p>';
+      return;
+    }
+
+    var html = '<div style="overflow-x:auto;"><table><thead><tr>' +
+      '<th>الاسم</th><th>الهاتف</th><th>البريد</th><th>الخدمة</th><th>التاريخ المفضل</th><th>الرسالة</th><th>وقت الإرسال</th><th>الحالة</th><th></th>' +
+      '</tr></thead><tbody>';
+
+    list.forEach(function (b) {
+      html += '<tr>';
+      html += '<td>' + esc(b.full_name) + '</td>';
+      html += '<td>' + esc(b.phone) + '</td>';
+      html += '<td>' + esc(b.email || '—') + '</td>';
+      html += '<td>' + esc(b.service || '—') + '</td>';
+      html += '<td>' + esc(b.preferred_date || '—') + '</td>';
+      html += '<td style="max-width:220px;white-space:pre-wrap;">' + esc(b.message || '—') + '</td>';
+      html += '<td>' + esc(fmtDate(b.created_at)) + '</td>';
+      html += '<td><select class="status-pill ' + statusClass(b.status) + '" data-status-for="' + b.id + '" style="border:none;">' +
+        ['جديد', 'تم التواصل', 'مكتمل'].map(function (s) {
+          return '<option' + (s === b.status ? ' selected' : '') + '>' + s + '</option>';
+        }).join('') + '</select></td>';
+      html += '<td><button class="mini-btn del" data-del-booking="' + b.id + '">حذف</button></td>';
+      html += '</tr>';
+    });
+
+    html += '</tbody></table></div>';
+    wrap.innerHTML = html;
+
+    wrap.querySelectorAll('[data-status-for]').forEach(function (sel) {
+      sel.addEventListener('change', function () {
+        var id = sel.getAttribute('data-status-for');
+        var list = loadBookings().map(function (b) {
+          if (String(b.id) === String(id)) b.status = sel.value;
+          return b;
+        });
+        saveBookings(list);
+        renderBookings();
+      });
+    });
+    wrap.querySelectorAll('[data-del-booking]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (!confirm('هل تريد حذف طلب الحجز هذا؟')) return;
+        var id = btn.getAttribute('data-del-booking');
+        saveBookings(loadBookings().filter(function (b) { return String(b.id) !== String(id); }));
+        renderBookings();
+      });
+    });
+  }
+
+  // ---- إدارة المشاريع ----
+  function loadProjects() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return DEFAULT_PROJECTS.slice();
+      var parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return DEFAULT_PROJECTS.slice();
+      return parsed;
+    } catch (e) {
+      return DEFAULT_PROJECTS.slice();
+    }
+  }
+
+  function saveProjects(list) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  }
+
+  function esc(s) {
+    var d = document.createElement('div');
+    d.textContent = s || '';
+    return d.innerHTML;
+  }
+
+  var form = document.getElementById('projectForm');
+  var editIdInput = document.getElementById('editId');
+  var formTitle = document.getElementById('formTitle');
+  var submitBtn = document.getElementById('submitBtn');
+  var cancelEditBtn = document.getElementById('cancelEditBtn');
+  var formAlert = document.getElementById('formAlert');
+
+  function resetForm() {
+    form.reset();
+    editIdInput.value = '';
+    formTitle.textContent = 'إضافة عمل جديد إلى «أعمالنا السابقة»';
+    submitBtn.textContent = 'حفظ المشروع';
+    cancelEditBtn.style.display = 'none';
+  }
+
+  cancelEditBtn.addEventListener('click', resetForm);
+
+  function flashAlert(msg) {
+    formAlert.textContent = msg;
+    formAlert.style.display = 'block';
+    setTimeout(function () { formAlert.style.display = 'none'; }, 2500);
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var title = document.getElementById('pTitle').value.trim();
+    var category = document.getElementById('pCategory').value;
+    var image = document.getElementById('pImage').value.trim();
+    var description = document.getElementById('pDesc').value.trim();
+    if (!title) return;
+
+    var list = loadProjects();
+    var editId = editIdInput.value;
+
+    if (editId) {
+      list = list.map(function (p) {
+        if (String(p.id) === String(editId)) {
+          return { id: p.id, title: title, category: category, image: image, description: description };
+        }
+        return p;
+      });
+      flashAlert('تم تحديث المشروع بنجاح.');
+    } else {
+      var newId = Date.now();
+      list.push({ id: newId, title: title, category: category, image: image, description: description });
+      flashAlert('تمت إضافة المشروع بنجاح.');
+    }
+
+    saveProjects(list);
+    resetForm();
+    renderList();
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', function () {
+    if (!confirm('هل تريد استعادة الأعمال الافتراضية؟ سيتم فقدان أي تعديلات محفوظة في هذا المتصفح.')) return;
+    saveProjects(DEFAULT_PROJECTS.slice());
+    resetForm();
+    renderList();
+  });
+
+  function editProject(id) {
+    var list = loadProjects();
+    var p = list.find(function (x) { return String(x.id) === String(id); });
+    if (!p) return;
+    editIdInput.value = p.id;
+    document.getElementById('pTitle').value = p.title;
+    document.getElementById('pCategory').value = p.category;
+    document.getElementById('pImage').value = p.image || '';
+    document.getElementById('pDesc').value = p.description || '';
+    formTitle.textContent = 'تعديل مشروع: ' + p.title;
+    submitBtn.textContent = 'حفظ التعديلات';
+    cancelEditBtn.style.display = 'inline-flex';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function deleteProject(id) {
+    if (!confirm('هل تريد حذف هذا المشروع؟')) return;
+    var list = loadProjects().filter(function (p) { return String(p.id) !== String(id); });
+    saveProjects(list);
+    renderList();
+  }
+
+  function renderList() {
+    var list = loadProjects();
+    var wrap = document.getElementById('projectList');
+    if (!list.length) {
+      wrap.innerHTML = '<p class="small-note">لا توجد مشاريع حالياً. أضف أول مشروع من النموذج أعلاه.</p>';
+      return;
+    }
+    var html = '';
+    list.forEach(function (p) {
+      var thumb = p.image
+        ? '<img src="' + esc(p.image) + '" alt="" onerror="this.style.display=\'none\'">'
+        : '<div style="width:64px;height:48px;border-radius:8px;background:var(--navy-2);flex:none;"></div>';
+      html += '<div class="admin-item">';
+      html += thumb;
+      html += '<div class="info"><h4>' + esc(p.title) + '</h4><span>' + esc(p.category) + '</span></div>';
+      html += '<button class="mini-btn edit" data-edit="' + p.id + '">تعديل</button>';
+      html += '<button class="mini-btn del" data-del="' + p.id + '">حذف</button>';
+      html += '</div>';
+    });
+    wrap.innerHTML = html;
+
+    wrap.querySelectorAll('[data-edit]').forEach(function (btn) {
+      btn.addEventListener('click', function () { editProject(btn.getAttribute('data-edit')); });
+    });
+    wrap.querySelectorAll('[data-del]').forEach(function (btn) {
+      btn.addEventListener('click', function () { deleteProject(btn.getAttribute('data-del')); });
+    });
+  }
+
+  // ---- إدارة الباقات والأسعار ----
+  var PLANS_KEY = 'sg_pricing_plans';
+
+  var DEFAULT_PLANS = [
+    { id: 1, name: 'الأساسية', price: 2500, currency: 'ج.م', description: 'موقع تعريفي بسيط', features: ['حتى 5 صفحات', 'تصميم متجاوب', 'نموذج تواصل', 'دعم لمدة شهر'], is_featured: false, sort_order: 1 },
+    { id: 2, name: 'الاحترافية', price: 5900, currency: 'ج.م', description: 'موقع أعمال متكامل', features: ['صفحات غير محدودة', 'لوحة تحكم لإدارة المحتوى', 'تحسين SEO أساسي', 'نظام حجز/تواصل', 'دعم 3 أشهر'], is_featured: true, sort_order: 2 }
+  ];
+
+  function loadPlans() {
+    try {
+      var raw = localStorage.getItem(PLANS_KEY);
+      if (!raw) return DEFAULT_PLANS.slice();
+      var parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return DEFAULT_PLANS.slice();
+      return parsed;
+    } catch (e) {
+      return DEFAULT_PLANS.slice();
+    }
+  }
+
+  function savePlans(list) {
+    localStorage.setItem(PLANS_KEY, JSON.stringify(list));
+  }
+
+  var planForm = document.getElementById('planForm');
+  var editPlanIdInput = document.getElementById('editPlanId');
+  var planFormTitle = document.getElementById('planFormTitle');
+  var planSubmitBtn = document.getElementById('planSubmitBtn');
+  var planCancelEditBtn = document.getElementById('planCancelEditBtn');
+  var planFormAlert = document.getElementById('planFormAlert');
+
+  function resetPlanForm() {
+    planForm.reset();
+    editPlanIdInput.value = '';
+    document.getElementById('plCurrency').value = 'ج.م';
+    document.getElementById('plSortOrder').value = (loadPlans().length + 1);
+    planFormTitle.textContent = 'إضافة باقة جديدة';
+    planSubmitBtn.textContent = 'حفظ الباقة';
+    planCancelEditBtn.style.display = 'none';
+  }
+
+  planCancelEditBtn.addEventListener('click', resetPlanForm);
+
+  function flashPlanAlert(msg) {
+    planFormAlert.textContent = msg;
+    planFormAlert.style.display = 'block';
+    setTimeout(function () { planFormAlert.style.display = 'none'; }, 2500);
+  }
+
+  planForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = document.getElementById('plName').value.trim();
+    var description = document.getElementById('plDescription').value.trim();
+    var price = parseFloat(document.getElementById('plPrice').value) || 0;
+    var currency = document.getElementById('plCurrency').value.trim() || 'ج.م';
+    var featuresRaw = document.getElementById('plFeatures').value;
+    var features = featuresRaw.split('\n').map(function (f) { return f.trim(); }).filter(function (f) { return f; });
+    var sortOrder = parseInt(document.getElementById('plSortOrder').value, 10) || 1;
+    var isFeatured = document.getElementById('plFeatured').checked;
+    if (!name) return;
+
+    var list = loadPlans();
+    var editId = editPlanIdInput.value;
+
+    if (editId) {
+      list = list.map(function (p) {
+        if (String(p.id) === String(editId)) {
+          return { id: p.id, name: name, description: description, price: price, currency: currency, features: features, is_featured: isFeatured, sort_order: sortOrder };
+        }
+        return p;
+      });
+      flashPlanAlert('تم تحديث الباقة بنجاح.');
+    } else {
+      var newId = Date.now();
+      list.push({ id: newId, name: name, description: description, price: price, currency: currency, features: features, is_featured: isFeatured, sort_order: sortOrder });
+      flashPlanAlert('تمت إضافة الباقة بنجاح.');
+    }
+
+    savePlans(list);
+    resetPlanForm();
+    renderPlans();
+  });
+
+  document.getElementById('resetPlansBtn').addEventListener('click', function () {
+    if (!confirm('هل تريد استعادة الباقات الافتراضية؟ سيتم فقدان أي تعديلات محفوظة في هذا المتصفح.')) return;
+    savePlans(DEFAULT_PLANS.slice());
+    resetPlanForm();
+    renderPlans();
+  });
+
+  function editPlan(id) {
+    var list = loadPlans();
+    var p = list.find(function (x) { return String(x.id) === String(id); });
+    if (!p) return;
+    editPlanIdInput.value = p.id;
+    document.getElementById('plName').value = p.name;
+    document.getElementById('plDescription').value = p.description || '';
+    document.getElementById('plPrice').value = p.price;
+    document.getElementById('plCurrency').value = p.currency || 'ج.م';
+    document.getElementById('plFeatures').value = (p.features || []).join('\n');
+    document.getElementById('plSortOrder').value = p.sort_order || 1;
+    document.getElementById('plFeatured').checked = !!p.is_featured;
+    planFormTitle.textContent = 'تعديل باقة: ' + p.name;
+    planSubmitBtn.textContent = 'حفظ التعديلات';
+    planCancelEditBtn.style.display = 'inline-flex';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function deletePlan(id) {
+    if (!confirm('هل تريد حذف هذه الباقة؟')) return;
+    var list = loadPlans().filter(function (p) { return String(p.id) !== String(id); });
+    savePlans(list);
+    renderPlans();
+  }
+
+  function renderPlans() {
+    var list = loadPlans().slice().sort(function (a, b) { return (a.sort_order || 0) - (b.sort_order || 0); });
+    var wrap = document.getElementById('planList');
+    if (!list.length) {
+      wrap.innerHTML = '<p class="small-note">لا توجد باقات حالياً. أضف أول باقة من النموذج أعلاه.</p>';
+      return;
+    }
+    var html = '';
+    list.forEach(function (p) {
+      html += '<div class="admin-item">';
+      html += '<div style="width:64px;height:48px;border-radius:8px;background:var(--navy-2);flex:none;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:12px;">' + esc(p.currency || 'ج.م') + '</div>';
+      html += '<div class="info"><h4>' + esc(p.name) + (p.is_featured ? ' ⭐' : '') + '</h4><span>' + Number(p.price || 0).toLocaleString('en-US') + ' ' + esc(p.currency || 'ج.م') + ' — ' + (p.features || []).length + ' مميزات</span></div>';
+      html += '<button class="mini-btn edit" data-edit-plan="' + p.id + '">تعديل</button>';
+      html += '<button class="mini-btn del" data-del-plan="' + p.id + '">حذف</button>';
+      html += '</div>';
+    });
+    wrap.innerHTML = html;
+
+    wrap.querySelectorAll('[data-edit-plan]').forEach(function (btn) {
+      btn.addEventListener('click', function () { editPlan(btn.getAttribute('data-edit-plan')); });
+    });
+    wrap.querySelectorAll('[data-del-plan]').forEach(function (btn) {
+      btn.addEventListener('click', function () { deletePlan(btn.getAttribute('data-del-plan')); });
+    });
+  }
+})();
+</script>
+</body>
+</html>
